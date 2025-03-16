@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTN Network Traffic Lookup</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+<body>
+    <div class="container">
+        <p class="mtn-slogan">What are we doing today?</p>
+        <img src="{{ url_for('static', filename='mtn-logo.jpg') }}" alt="MTN Logo" class="mtn-logo">
+        <h2>AI-Powered Network Traffic & Resource Optimization</h2>
+        
+        <div class="query-section">
+            <label for="cell_id">Enter Cell ID:</label>
+            <input type="text" id="cell_id" placeholder="e.g., cell_123">
+            <button onclick="fetchData()">Search</button>
+            <div id="result"></div>
+        </div>
+
+        <div class="upload-section">
+            <h3>Batch Lookup (CSV)</h3>
+            <input type="file" id="csvFile">
+            <button onclick="uploadCSV()">Upload & Process</button>
+            <div id="download"></div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const cellId = document.getElementById("cell_id").value.trim();
+            if (!cellId) {
+                document.getElementById("result").innerHTML = "<p class='error'>Please enter a Cell ID.</p>";
+                return;
+            }
+            document.getElementById("result").innerHTML = "<p>Loading...</p>";
+            const response = await fetch("/query_csv", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cell_id: cellId })
+            });
+            const data = await response.json();
+            document.getElementById("result").innerHTML = `<p>${data.response || data.error}</p>`;
+        }
+
+        async function uploadCSV() {
+            const fileInput = document.getElementById("csvFile");
+            if (!fileInput.files.length) {
+                document.getElementById("download").innerHTML = "<p class='error'>Please select a file.</p>";
+                return;
+            }
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            document.getElementById("download").innerHTML = "<p>Processing...</p>";
+            const response = await fetch("/upload_csv", { method: "POST", body: formData });
+            const data = await response.json();
+            if (data.download_url) {
+                document.getElementById("download").innerHTML = `<a href="${data.download_url}" download>Download Results</a>`;
+            } else {
+                document.getElementById("download").innerHTML = `<p class='error'>${data.error}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
