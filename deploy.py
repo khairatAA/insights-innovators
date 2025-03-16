@@ -41,7 +41,7 @@ def query_csv():
         resource_allocation = latest_entry.get("Capacity_Allocated(Mbps)", "N/A")
         timestamp_label = latest_entry.get("timestamp", "N/A")
         
-        response_text = (f"For cell {cell_id}, the predicted network traffic usage is {network_traffic_usage}, "
+        response_text = (f"For {cell_id}, the predicted network traffic usage is {network_traffic_usage}, "
                          f"and the needed resource allocation for this traffic is {resource_allocation} Mbps.")
         
         return jsonify({"response": response_text})
